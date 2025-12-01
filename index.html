@@ -4,10 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>InkLoom Auth System</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    body { font-family: Arial, sans-serif; background:#f5f5f5; margin:0; padding:20px; }
+    .container { max-width:400px; margin:auto; background:white; padding:20px; border-radius:10px; margin-bottom:20px; }
+    input, button, textarea { width:100%; padding:10px; margin:8px 0; box-sizing: border-box; }
+    #profilePage, #booksSection { display:none; }
+    .avatar { width:80px; height:80px; border-radius:50%; object-fit:cover; }
+    .book { padding:10px; background:#eee; margin:5px 0; border-radius:5px; cursor:pointer; }
+  </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" id="authContainer">
     <h2>Sign Up</h2>
     <input id="su_email" type="email" placeholder="Email" />
     <input id="su_pass" type="password" placeholder="Password" />
@@ -39,6 +46,120 @@
     <button onclick="saveBook()">Save Book</button>
   </div>
 
-  <script src="js/script.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCiqRuzqN6460s02rYk7ZGMbIUGbmVVXxg",
+        authDomain: "inkloom-12008.firebaseapp.com",
+        projectId: "inkloom-12008",
+        storageBucket: "inkloom-12008.firebasestorage.app",
+        messagingSenderId: "148104043088",
+        appId: "1:148104043088:web:1b9b2b0d937437d2670f55"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    window.signUp = async function() {
+      try {
+        const email = document.getElementById('su_email').value;
+        const pass = document.getElementById('su_pass').value;
+        await createUserWithEmailAndPassword(auth, email, pass);
+        alert("Account created!");
+      } catch(e) { alert(e.message); }
+    };
+
+    window.logIn = async function() {
+      try {
+        const email = document.getElementById('li_email').value;
+        const pass = document.getElementById('li_pass').value;
+        await signInWithEmailAndPassword(auth, email, pass);
+        alert("Logged in!");
+      } catch(e) { alert(e.message); }
+    };
+
+    window.forgotPassword = async function() {
+      try {
+        const email = document.getElementById('li_email').value;
+        await sendPasswordResetEmail(auth, email);
+        alert("Password reset email sent!");
+      } catch(e) { alert(e.message); }
+    };
+
+    window.logOut = function() {
+      signOut(auth);
+    };
+
+    window.saveProfile = async function() {
+      const user = auth.currentUser;
+      const ref = doc(db, "users", user.uid);
+      await setDoc(ref, {
+        username: document.getElementById('username').value,
+        bio: document.getElementById('bio').value,
+        avatar: document.getElementById('avatarUrl').value
+      }, { merge: true });
+      alert("Profile updated!");
+    };
+
+    window.saveBook = async function() {
+      const user = auth.currentUser;
+      const ref = doc(db, "users", user.uid);
+      const bookName = document.getElementById('bookName').value;
+      if(bookName) {
+        await updateDoc(ref, { savedBooks: arrayUnion(bookName) });
+        loadBooks();
+        document.getElementById('bookName').value = '';
+      }
+    };
+
+    async function loadProfile(user) {
+      const ref = doc(db, "users", user.uid);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        const d = snap.data();
+        document.getElementById('avatarImg').src = d.avatar || "";
+        document.getElementById('username').value = d.username || "";
+        document.getElementById('bio').value = d.bio || "";
+      }
+    }
+
+    async function loadBooks() {
+      const user = auth.currentUser;
+      const ref = doc(db, "users", user.uid);
+      const snap = await getDoc(ref);
+      const list = document.getElementById('savedBooksList');
+      list.innerHTML = "";
+      if (snap.exists() && snap.data().savedBooks) {
+        snap.data().savedBooks.forEach(b => {
+          const div = document.createElement("div");
+          div.className = "book";
+          div.textContent = b;
+          list.appendChild(div);
+        });
+      }
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      const authContainer = document.getElementById('authContainer');
+      const profilePage = document.getElementById('profilePage');
+      const booksSection = document.getElementById('booksSection');
+
+      if (user) {
+        authContainer.style.display = "none";
+        profilePage.style.display = "block";
+        booksSection.style.display = "block";
+        loadProfile(user);
+        loadBooks();
+      } else {
+        authContainer.style.display = "block";
+        profilePage.style.display = "none";
+        booksSection.style.display = "none";
+      }
+    });
+  </script>
 </body>
 </html>
