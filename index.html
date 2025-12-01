@@ -10,7 +10,7 @@
     body { background:#f9f9f9; color:#333; }
 
     /* Navbar */
-    .navbar { display:flex; justify-content:space-between; align-items:center; padding:1rem 2rem; background:#2e7d32; color:white; }
+    .navbar { display:flex; justify-content:space-between; align-items:center; padding:1rem 2rem; background:#31694E; color:rgb(241, 243, 224); }
     .navbar a { color:white; text-decoration:none; margin-left:1rem; }
     .navbar a:hover { text-decoration:underline; }
 
@@ -21,12 +21,12 @@
     .profile { display:flex; align-items:center; gap:1.5rem; margin-bottom:2rem; }
     .avatar { width:100px; height:100px; border-radius:50%; object-fit:cover; }
     .profile-info input, .profile-info textarea { display:block; width:100%; padding:0.5rem; margin:0.5rem 0; border-radius:6px; border:1px solid #ccc; }
-    .profile-info button { padding:0.5rem 1rem; background:#2e7d32; color:white; border:none; border-radius:6px; cursor:pointer; }
+    .profile-info button { padding:0.5rem 1rem; background:#31694E; color:rgb(241, 243, 224); border:none; border-radius:6px; cursor:pointer; }
 
     /* Books List */
     .books { margin-top:2rem; }
     .book-item { display:flex; justify-content:space-between; padding:0.75rem 1rem; background:#e8f5e9; margin:0.5rem 0; border-radius:6px; }
-    .book-item button { padding:0.25rem 0.5rem; border:none; border-radius:4px; background:#2e7d32; color:white; cursor:pointer; }
+    .book-item button { padding:0.25rem 0.5rem; border:none; border-radius:4px; background:#31694E; color:rgb(241, 243, 224); cursor:pointer; }
 
     /* Dashboard Visibility */
     #authContainer { display:block; }
@@ -35,7 +35,7 @@
     /* Auth Form */
     .auth-form { max-width:400px; margin:2rem auto; background:white; padding:2rem; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.1); }
     .auth-form input, .auth-form button { width:100%; padding:0.5rem; margin:0.5rem 0; border-radius:6px; border:1px solid #ccc; }
-    .auth-form button { background:#2e7d32; color:white; border:none; cursor:pointer; }
+    .auth-form button { background:#31694E; color:white; border:none; cursor:pointer; }
   </style>
 </head>
 <body>
@@ -90,12 +90,12 @@
     import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
     const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_AUTH_DOMAIN",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_BUCKET",
-        messagingSenderId: "YOUR_SENDER_ID",
-        appId: "YOUR_APP_ID"
+        apiKey: "AIzaSyCiqRuzqN6460s02rYk7ZGMbIUGbmVVXxg",
+        authDomain: "inkloom-12008.firebaseapp.com",
+        projectId: "inkloom-12008",
+        storageBucket: "inkloom-12008.firebasestorage.app",
+        messagingSenderId: "148104043088",
+        appId: "1:148104043088:web:1b9b2b0d937437d2670f55"
     };
 
     const app = initializeApp(firebaseConfig);
