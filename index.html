@@ -1,213 +1,455 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>InkLoom Dashboard</title>
-  <style>
-    /* General reset */
-    * { margin:0; padding:0; box-sizing:border-box; font-family: 'Poppins', sans-serif; }
-    body { background:#f9f9f9; color:#333; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InkLoom Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+      /* --- Color Palette & General Reset --- */
+      :root {
+        --deep-brown: #282c28;
+        --leaf-green: #31694E;
+        --deep-green: rgb(119, 136, 115);
+        --sage: rgb(161, 188, 152);
+        --light-green: rgb(210, 220, 182);
+        --cream: rgb(241, 243, 224);
+        --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.05);
+        --border-radius: 8px;
+      }
+      * { margin:0; padding:0; box-sizing:border-box; font-family: 'Poppins', sans-serif; }
+      body { background:var(--cream); color:var(--deep-brown); line-height:1.6; }
 
-    /* Navbar */
-    .navbar { display:flex; justify-content:space-between; align-items:center; padding:1rem 2rem; background:#31694E; color:rgb(241, 243, 224); }
-    .navbar a { color:white; text-decoration:none; margin-left:1rem; }
-    .navbar a:hover { text-decoration:underline; }
+      /* --- Utility Styles --- */
+      h2, h3 { color:var(--deep-brown); margin-bottom: 0.75rem; font-weight: 600; }
+      
+      /* --- Navbar --- */
+      .navbar { display:flex; justify-content:space-between; align-items:center; padding:1rem 2rem; background:var(--leaf-green); color:var(--cream); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+      .navbar .logo { font-size:1.5rem; font-weight:700; color:var(--cream); }
+      .navbar a { color:var(--cream); text-decoration:none; margin-left:1.5rem; transition:color 0.3s; }
+      .navbar a:hover { color:var(--light-green); }
 
-    /* Main Container */
-    .container { max-width:900px; margin:2rem auto; background:white; padding:2rem; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.1); }
+      /* --- Main Container --- */
+      .container { max-width:1000px; margin:2rem auto; padding:2rem; background:white; border-radius:var(--border-radius); box-shadow:var(--shadow-light); }
 
-    /* Profile */
-    .profile { display:flex; align-items:center; gap:1.5rem; margin-bottom:2rem; }
-    .avatar { width:100px; height:100px; border-radius:50%; object-fit:cover; }
-    .profile-info input, .profile-info textarea { display:block; width:100%; padding:0.5rem; margin:0.5rem 0; border-radius:6px; border:1px solid #ccc; }
-    .profile-info button { padding:0.5rem 1rem; background:#31694E; color:rgb(241, 243, 224); border:none; border-radius:6px; cursor:pointer; }
+      /* --- Form Elements (Inputs & Buttons) --- */
+      input, textarea, button { font-size:1rem; padding:0.75rem 1rem; margin:0.5rem 0; border-radius:var(--border-radius); transition: all 0.2s ease-in-out; }
+      
+      input:not([type="file"]), textarea { display:block; width:100%; border:1px solid #ddd; background: #fff; }
+      input:focus, textarea:focus { border-color:var(--leaf-green); box-shadow: 0 0 0 2px var(--sage); outline:none; }
 
-    /* Books List */
-    .books { margin-top:2rem; }
-    .book-item { display:flex; justify-content:space-between; padding:0.75rem 1rem; background:#e8f5e9; margin:0.5rem 0; border-radius:6px; }
-    .book-item button { padding:0.25rem 0.5rem; border:none; border-radius:4px; background:#31694E; color:rgb(241, 243, 224); cursor:pointer; }
+      button { border:none; cursor:pointer; font-weight:600; }
+      
+      .btn-primary { 
+        background:var(--leaf-green); 
+        color:var(--cream); 
+      }
+      .btn-primary:hover { 
+        background:var(--deep-green); 
+        transform: translateY(-1px);
+      }
+      .btn-secondary {
+        background: var(--light-green);
+        color: var(--deep-brown);
+      }
+      .btn-secondary:hover {
+        background: var(--sage);
+      }
+      
+      /* --- Auth Form --- */
+      .auth-form { max-width:400px; margin:2rem auto; background:white; padding:2.5rem; border-radius:var(--border-radius); box-shadow:var(--shadow-light); }
+      .auth-form button { margin-top: 1rem; }
+      .auth-form .form-section { margin-bottom: 2rem; border-bottom: 1px solid #eee; padding-bottom: 1.5rem; }
+      .auth-form .form-section:last-of-type { border-bottom: none; }
 
-    /* Dashboard Visibility */
-    #authContainer { display:block; }
-    #dashboard { display:none; }
 
-    /* Auth Form */
-    .auth-form { max-width:400px; margin:2rem auto; background:white; padding:2rem; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.1); }
-    .auth-form input, .auth-form button { width:100%; padding:0.5rem; margin:0.5rem 0; border-radius:6px; border:1px solid #ccc; }
-    .auth-form button { background:#31694E; color:white; border:none; cursor:pointer; }
-  </style>
-</head>
-<body>
+      /* --- Profile Section --- */
+      .profile { 
+        display:grid; 
+        grid-template-columns: 150px 1fr; 
+        gap: 2.5rem; 
+        margin-bottom:2rem; 
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--light-green);
+      }
+      
+      .avatar-area {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
 
-  <!-- Navbar -->
-  <div class="navbar">
-    <div class="logo">InkLoom</div>
-    <div id="navLinks">
-      <a href="#" id="loginLink">Login / Sign Up</a>
-      <a href="#" id="logoutLink" style="display:none;">Logout</a>
-    </div>
-  </div>
+      .avatar { 
+        width:130px; 
+        height:130px; 
+        border-radius:50%; 
+        object-fit:cover; 
+        border: 4px solid var(--leaf-green);
+        margin-bottom:1rem; 
+        box-shadow: 0 0 0 4px var(--cream);
+      }
+      
+      .default-avatars-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 0.5rem;
+      }
+      .default-avatar {
+        width:40px;
+        height:40px;
+        border-radius:50%;
+        cursor:pointer;
+        border:2px solid transparent;
+        transition:border-color 0.3s;
+      }
+      .default-avatar:hover { border-color:var(--deep-green); }
+      .default-avatar.selected { border-color:var(--leaf-green); border-width: 3px; }
 
-  <!-- Authentication Container -->
-  <div class="auth-form" id="authContainer">
-    <h2>Sign Up</h2>
-    <input id="su_email" type="email" placeholder="Email" />
-    <input id="su_pass" type="password" placeholder="Password" />
-    <button onclick="signUp()">Sign Up</button>
+      .profile-info {
+        display: flex;
+        flex-direction: column;
+      }
+      .profile-info textarea { min-height: 100px; }
+      .profile-info button { width: auto; align-self: flex-start; margin-top: 1rem; }
+      .profile-info h4 { margin-top: 1rem; color: var(--deep-green); }
+      
 
-    <h2>Log In</h2>
-    <input id="li_email" type="email" placeholder="Email" />
-    <input id="li_pass" type="password" placeholder="Password" />
-    <button onclick="logIn()">Log In</button>
+      /* Avatar Upload + Default Avatars */
+      .avatar-upload-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+        width: 140px; /* Match avatar width + padding */
+      }
 
-    <button onclick="forgotPassword()">Forgot Password?</button>
-  </div>
+      .avatar-upload-container input[type="file"] {
+        display: none; /* Hidden default file input */
+      }
 
-  <!-- Dashboard -->
-  <div class="container" id="dashboard">
-    <div class="profile">
-      <img id="avatarImg" class="avatar" src="" alt="avatar" />
-      <div class="profile-info">
-        <input id="avatarUrl" placeholder="Avatar URL" />
-        <input id="username" placeholder="Username" />
-        <textarea id="bio" placeholder="Bio"></textarea>
-        <button onclick="saveProfile()">Save Profile</button>
+      .upload-label {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background-color: var(--light-green);
+        color: var(--deep-brown);
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        font-size: 0.9rem;
+        text-align: center;
+        width: 100%;
+      }
+
+      .upload-label:hover {
+        background-color: var(--sage);
+      }
+
+      .upload-btn {
+        width: 100%;
+        padding: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+
+      /* --- Books List --- */
+      .books { margin-top:2.5rem; }
+      .book-item { 
+        display:flex; 
+        justify-content:space-between; 
+        align-items:center;
+        padding:1rem 1.5rem; 
+        background:var(--light-green); 
+        margin:0.75rem 0; 
+        border-radius:var(--border-radius); 
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        font-weight: 500;
+      }
+      .book-item span { color: var(--deep-brown); }
+      .book-item button { padding:0.5rem 1rem; font-size: 0.9rem; }
+      
+      .add-book-form { 
+        display: flex; 
+        gap: 1rem; 
+        margin-top: 1.5rem; 
+        align-items: center;
+      }
+      .add-book-form input { margin: 0; }
+      .add-book-form button { width: auto; white-space: nowrap; }
+
+      /* --- Dashboard Visibility --- */
+      #authContainer { display:block; }
+      #dashboard { display:none; }
+
+      /* Responsive Adjustments */
+      @media (max-width: 768px) {
+        .navbar { padding: 1rem; }
+        .navbar a { margin-left: 1rem; font-size: 0.9rem; }
+        .container { margin: 1rem; padding: 1.5rem; }
+        .profile { grid-template-columns: 1fr; text-align: center; }
+        .avatar-area { margin-bottom: 1rem; }
+        .profile-info button { align-self: center; }
+        .file-upload-group { max-width: none; align-self: center;}
+        .add-book-form { flex-direction: column; }
+        .add-book-form input { width: 100%; }
+        .add-book-form button { width: 100%; }
+        .default-avatars-container { justify-content: center; }
+      }
+
+    </style>
+  </head>
+  <body>
+
+    <div class="navbar">
+      <div class="logo">InkLoom</div>
+      <div id="navLinks">
+        <a href="#" id="loginLink">Login / Sign Up</a>
+        <a href="#" id="logoutLink" style="display:none;">Logout</a>
       </div>
     </div>
 
-    <div class="books">
-      <h3>Your Saved Books</h3>
-      <div id="savedBooksList"></div>
-      <input id="bookName" placeholder="Book Title" />
-      <button onclick="saveBook()">Add Book</button>
+    <div class="auth-form" id="authContainer">
+      <div class="form-section">
+        <h2>Sign Up</h2>
+        <input id="su_email" type="email" placeholder="Email" />
+        <input id="su_pass" type="password" placeholder="Password" />
+        <button class="btn-primary" onclick="signUp()">Sign Up</button>
+      </div>
+
+      <div class="form-section">
+        <h2>Log In</h2>
+        <input id="li_email" type="email" placeholder="Email" />
+        <input id="li_pass" type="password" placeholder="Password" />
+        <button class="btn-primary" onclick="logIn()">Log In</button>
+        <button class="btn-secondary" style="margin-top: 10px;" onclick="forgotPassword()">Forgot Password?</button>
+      </div>
     </div>
-  </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+    <div class="container" id="dashboard">
+      
+      <div class="avatar-area">
+          <h3>Your Profile</h3>
+          <img id="avatarImg" class="avatar" src="" alt="avatar" />
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyCiqRuzqN6460s02rYk7ZGMbIUGbmVVXxg",
-        authDomain: "inkloom-12008.firebaseapp.com",
-        projectId: "inkloom-12008",
-        storageBucket: "inkloom-12008.firebasestorage.app",
-        messagingSenderId: "148104043088",
-        appId: "1:148104043088:web:1b9b2b0d937437d2670f55"
-    };
+          <!-- Upload Custom Avatar -->
+          <div class="avatar-upload-container">
+            <label for="avatarFile" class="btn-secondary upload-label">Choose File</label>
+            <input type="file" id="avatarFile" accept="image/*" />
+            <button class="btn-secondary upload-btn" onclick="uploadAvatar()">Upload</button>
+          </div>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+          <!-- Default Avatars -->
+          <h4 style="margin-top: 1.5rem;">Or choose a default:</h4>
+          <div id="defaultAvatars" class="default-avatars-container">
+            <img src="images/default.png" class="default-avatar" onclick="selectDefaultAvatar(this)" />
+            <img src="images/default1.png" class="default-avatar" onclick="selectDefaultAvatar(this)" />
+            <img src="images/default2.png" class="default-avatar" onclick="selectDefaultAvatar(this)" />
+            <img src="images/default3.png" class="default-avatar" onclick="selectDefaultAvatar(this)" />
+            <img src="images/default4.png" class="default-avatar" onclick="selectDefaultAvatar(this)" />
+            <img src="images/default5.png" class="default-avatar" onclick="selectDefaultAvatar(this)" />
+            <img src="images/default6.png" class="default-avatar" onclick="selectDefaultAvatar(this)" />
+            <img src="images/default7.png" class="default-avatar" onclick="selectDefaultAvatar(this)" />
+            <img src="images/default8.png" class="default-avatar" onclick="selectDefaultAvatar(this)" />
+            <img src="images/default9.png" class="default-avatar" onclick="selectDefaultAvatar(this)" />
+            <img src="images/default10.png" class="default-avatar" onclick="selectDefaultAvatar(this)" />
+            <img src="images/default11.png" class="default-avatar" onclick="selectDefaultAvatar(this)" />
+            <img src="images/default12.png" class="default-avatar" onclick="selectDefaultAvatar(this)" />
+          </div>
+        </div>
 
-    // Auth Functions
-    window.signUp = async function() {
-      try {
-        const email = document.getElementById('su_email').value;
-        const pass = document.getElementById('su_pass').value;
-        await createUserWithEmailAndPassword(auth, email, pass);
-        alert("Account created!");
-      } catch(e) { alert(e.message); }
-    };
+        <div class="profile-info">
+          <h3>Profile Details</h3>
+          <input id="username" placeholder="Username" />
+          <textarea id="bio" placeholder="Tell us about your reading goals or favorite genres..."></textarea>
+          <button class="btn-primary" onclick="saveProfile()">Save Profile</button>
+        </div>
+      </div>
+      
+      <div class="books">
+        <h3>📚 Your Saved Books</h3>
+        <div id="savedBooksList"></div>
+        <div class="add-book-form">
+          <input id="bookName" placeholder="Enter Book Title to Add" />
+          <button class="btn-primary" onclick="saveBook()">Add Book</button>
+        </div>
+      </div>
+    </div>
 
-    window.logIn = async function() {
-      try {
-        const email = document.getElementById('li_email').value;
-        const pass = document.getElementById('li_pass').value;
-        await signInWithEmailAndPassword(auth, email, pass);
-        alert("Logged in!");
-      } catch(e) { alert(e.message); }
-    };
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+      import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+      import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
-    window.forgotPassword = async function() {
-      try {
-        const email = document.getElementById('li_email').value;
-        await sendPasswordResetEmail(auth, email);
-        alert("Password reset email sent!");
-      } catch(e) { alert(e.message); }
-    };
+      const firebaseConfig = {
+          apiKey: "AIzaSyCiqRuzqN6460s02rYk7ZGMbIUGbmVVXxg",
+          authDomain: "inkloom-12008.firebaseapp.com",
+          projectId: "inkloom-12008",
+          storageBucket: "inkloom-12008.firebasestorage.app",
+          messagingSenderId: "148104043088",
+          appId: "1:148104043088:web:1b9b2b0d937437d2670f55"
+      };
 
-    window.logOut = function() {
-      signOut(auth);
-    };
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+      const storage = getStorage(app);
 
-    window.saveProfile = async function() {
-      const user = auth.currentUser;
-      const ref = doc(db, "users", user.uid);
-      await setDoc(ref, {
-        username: document.getElementById('username').value,
-        bio: document.getElementById('bio').value,
-        avatar: document.getElementById('avatarUrl').value
-      }, { merge: true });
-      alert("Profile updated!");
-      loadProfile(user);
-    };
+      // --- Auth Functions ---
+      window.signUp = async function() {
+        try {
+          const email = document.getElementById('su_email').value;
+          const pass = document.getElementById('su_pass').value;
+          await createUserWithEmailAndPassword(auth, email, pass);
+          alert("Account created!");
+        } catch(e) { alert(e.message); }
+      };
 
-    window.saveBook = async function() {
-      const user = auth.currentUser;
-      const ref = doc(db, "users", user.uid);
-      const bookName = document.getElementById('bookName').value;
-      if(bookName) {
-        await updateDoc(ref, { savedBooks: arrayUnion(bookName) });
-        loadBooks();
-        document.getElementById('bookName').value = '';
+      window.logIn = async function() {
+        try {
+          const email = document.getElementById('li_email').value;
+          const pass = document.getElementById('li_pass').value;
+          await signInWithEmailAndPassword(auth, email, pass);
+          alert("Logged in!");
+        } catch(e) { alert(e.message); }
+      };
+
+      window.forgotPassword = async function() {
+        try {
+          const email = document.getElementById('li_email').value;
+          await sendPasswordResetEmail(auth, email);
+          alert("Password reset email sent!");
+        } catch(e) { alert(e.message); }
+      };
+
+      window.logOut = async function() {
+        await signOut(auth);
+        alert("Logged out!");
+      };
+
+      // --- Profile Functions ---
+      async function loadProfile(user) {
+        const ref = doc(db, "users", user.uid);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          const d = snap.data();
+          document.getElementById('avatarImg').src = d.avatar || "";
+          document.getElementById('username').value = d.username || "";
+          document.getElementById('bio').value = d.bio || "";
+        }
       }
-    };
 
-    async function loadProfile(user) {
-      const ref = doc(db, "users", user.uid);
-      const snap = await getDoc(ref);
-      if (snap.exists()) {
-        const d = snap.data();
-        document.getElementById('avatarImg').src = d.avatar || "";
-        document.getElementById('username').value = d.username || "";
-        document.getElementById('bio').value = d.bio || "";
-      }
-    }
+      window.saveProfile = async function() {
+        const user = auth.currentUser;
+        if (!user) return;
 
-    async function loadBooks() {
-      const user = auth.currentUser;
-      const ref = doc(db, "users", user.uid);
-      const snap = await getDoc(ref);
-      const list = document.getElementById('savedBooksList');
-      list.innerHTML = "";
-      if (snap.exists() && snap.data().savedBooks) {
-        snap.data().savedBooks.forEach((b, i) => {
-          const div = document.createElement("div");
-          div.className = "book-item";
-          div.innerHTML = `<span>${b}</span> <button onclick='markRead(${i})'>Mark Read</button>`;
-          list.appendChild(div);
+        const avatarSrc = document.getElementById('avatarImg').src;
+        const userRef = doc(db, "users", user.uid);
+        await setDoc(userRef, {
+          username: document.getElementById('username').value,
+          bio: document.getElementById('bio').value,
+          avatar: avatarSrc
+        }, { merge: true });
+        alert("Profile updated!");
+      };
+
+      // --- Avatar Functions ---
+      window.uploadAvatar = async function() {
+        const fileInput = document.getElementById('avatarFile');
+        if (!fileInput.files.length) { alert("Please select a file!"); return; }
+
+        const file = fileInput.files[0];
+        const user = auth.currentUser;
+        const avatarRef = storageRef(storage, `avatars/${user.uid}/${file.name}`);
+
+        try {
+          await uploadBytes(avatarRef, file);
+          const url = await getDownloadURL(avatarRef);
+          document.getElementById('avatarImg').src = url;
+
+          const userRef = doc(db, "users", user.uid);
+          await setDoc(userRef, { avatar: url }, { merge: true });
+          alert("Avatar uploaded successfully!");
+        } catch (e) { alert("Error uploading avatar: " + e.message); }
+      };
+      
+      window.selectDefaultAvatar = function(imgElement) {
+        // Remove 'selected' class from all other default avatars
+        document.querySelectorAll('.default-avatar').forEach(img => {
+            img.classList.remove('selected');
         });
-      }
-    }
 
-    window.markRead = async function(index) {
-      alert(`Book ${index+1} marked as read! (You can integrate progress tracking here)`);
-    };
+        // Add 'selected' class to the clicked avatar
+        imgElement.classList.add('selected');
 
-    // Auth State Observer
-    onAuthStateChanged(auth, (user) => {
-      const authContainer = document.getElementById('authContainer');
-      const dashboard = document.getElementById('dashboard');
-      const loginLink = document.getElementById('loginLink');
-      const logoutLink = document.getElementById('logoutLink');
+        const url = imgElement.src;
+        document.getElementById('avatarImg').src = url;
 
-      if (user) {
-        authContainer.style.display = "none";
-        dashboard.style.display = "block";
-        loginLink.style.display = "none";
-        logoutLink.style.display = "inline-block";
-        loadProfile(user);
+        const user = auth.currentUser;
+        if (user) {
+          const userRef = doc(db, "users", user.uid);
+          setDoc(userRef, { avatar: url }, { merge: true })
+            .then(() => console.log("Default avatar selected"))
+            .catch(err => console.error(err));
+        }
+      };
+
+      // --- Saved Books ---
+      window.saveBook = async function() {
+        const user = auth.currentUser;
+        const bookName = document.getElementById('bookName').value.trim(); // Trim whitespace
+        if (!bookName) return;
+
+        const ref = doc(db, "users", user.uid);
+        await updateDoc(ref, { savedBooks: arrayUnion(bookName) });
+        document.getElementById('bookName').value = '';
         loadBooks();
-      } else {
-        authContainer.style.display = "block";
-        dashboard.style.display = "none";
-        loginLink.style.display = "inline-block";
-        logoutLink.style.display = "none";
+      };
+
+      async function loadBooks() {
+        const user = auth.currentUser;
+        const ref = doc(db, "users", user.uid);
+        const snap = await getDoc(ref);
+        const list = document.getElementById('savedBooksList');
+        list.innerHTML = "";
+        if (snap.exists() && snap.data().savedBooks) {
+          const books = snap.data().savedBooks;
+          books.forEach((b, i) => {
+            const div = document.createElement("div");
+            div.className = "book-item";
+            // Escaping HTML content in book title for safety
+            const safeBookTitle = b.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            div.innerHTML = `<span>${safeBookTitle}</span> <button class='btn-secondary' onclick='markRead(${i})'>Mark Read</button>`;
+            list.appendChild(div);
+          });
+        }
       }
-    });
-  </script>
-</body>
+
+      window.markRead = async function(index) {
+        alert(`Book ${index + 1} marked as read! (You can integrate progress tracking here)`);
+      };
+
+      // --- Auth State Observer ---
+      onAuthStateChanged(auth, (user) => {
+        const authContainer = document.getElementById('authContainer');
+        const dashboard = document.getElementById('dashboard');
+        const loginLink = document.getElementById('loginLink');
+        const logoutLink = document.getElementById('logoutLink');
+
+        if (user) {
+          authContainer.style.display = "none";
+          dashboard.style.display = "block";
+          loginLink.style.display = "none";
+          logoutLink.style.display = "inline-block";
+          loadProfile(user);
+          loadBooks();
+        } else {
+          authContainer.style.display = "block";
+          dashboard.style.display = "none";
+          loginLink.style.display = "inline-block";
+          logoutLink.style.display = "none";
+        }
+      });
+    </script>
+  </body>
 </html>
