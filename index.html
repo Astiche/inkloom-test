@@ -3,18 +3,54 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>InkLoom Auth System</title>
+  <title>InkLoom Dashboard</title>
   <style>
-    body { font-family: Arial, sans-serif; background:#f5f5f5; margin:0; padding:20px; }
-    .container { max-width:400px; margin:auto; background:white; padding:20px; border-radius:10px; margin-bottom:20px; }
-    input, button, textarea { width:100%; padding:10px; margin:8px 0; box-sizing: border-box; }
-    #profilePage, #booksSection { display:none; }
-    .avatar { width:80px; height:80px; border-radius:50%; object-fit:cover; }
-    .book { padding:10px; background:#eee; margin:5px 0; border-radius:5px; cursor:pointer; }
+    /* General reset */
+    * { margin:0; padding:0; box-sizing:border-box; font-family: 'Poppins', sans-serif; }
+    body { background:#f9f9f9; color:#333; }
+
+    /* Navbar */
+    .navbar { display:flex; justify-content:space-between; align-items:center; padding:1rem 2rem; background:#2e7d32; color:white; }
+    .navbar a { color:white; text-decoration:none; margin-left:1rem; }
+    .navbar a:hover { text-decoration:underline; }
+
+    /* Main Container */
+    .container { max-width:900px; margin:2rem auto; background:white; padding:2rem; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.1); }
+
+    /* Profile */
+    .profile { display:flex; align-items:center; gap:1.5rem; margin-bottom:2rem; }
+    .avatar { width:100px; height:100px; border-radius:50%; object-fit:cover; }
+    .profile-info input, .profile-info textarea { display:block; width:100%; padding:0.5rem; margin:0.5rem 0; border-radius:6px; border:1px solid #ccc; }
+    .profile-info button { padding:0.5rem 1rem; background:#2e7d32; color:white; border:none; border-radius:6px; cursor:pointer; }
+
+    /* Books List */
+    .books { margin-top:2rem; }
+    .book-item { display:flex; justify-content:space-between; padding:0.75rem 1rem; background:#e8f5e9; margin:0.5rem 0; border-radius:6px; }
+    .book-item button { padding:0.25rem 0.5rem; border:none; border-radius:4px; background:#2e7d32; color:white; cursor:pointer; }
+
+    /* Dashboard Visibility */
+    #authContainer { display:block; }
+    #dashboard { display:none; }
+
+    /* Auth Form */
+    .auth-form { max-width:400px; margin:2rem auto; background:white; padding:2rem; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.1); }
+    .auth-form input, .auth-form button { width:100%; padding:0.5rem; margin:0.5rem 0; border-radius:6px; border:1px solid #ccc; }
+    .auth-form button { background:#2e7d32; color:white; border:none; cursor:pointer; }
   </style>
 </head>
 <body>
-  <div class="container" id="authContainer">
+
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="logo">InkLoom</div>
+    <div id="navLinks">
+      <a href="#" id="loginLink">Login / Sign Up</a>
+      <a href="#" id="logoutLink" style="display:none;">Logout</a>
+    </div>
+  </div>
+
+  <!-- Authentication Container -->
+  <div class="auth-form" id="authContainer">
     <h2>Sign Up</h2>
     <input id="su_email" type="email" placeholder="Email" />
     <input id="su_pass" type="password" placeholder="Password" />
@@ -28,22 +64,24 @@
     <button onclick="forgotPassword()">Forgot Password?</button>
   </div>
 
-  <div class="container" id="profilePage">
-    <h2>Your Profile</h2>
-    <img id="avatarImg" class="avatar" src="" alt="avatar" />
-    <input id="avatarUrl" placeholder="Avatar Image URL" />
-    <input id="username" placeholder="Username" />
-    <textarea id="bio" placeholder="Bio"></textarea>
-    <button onclick="saveProfile()">Save Profile</button>
-    <button onclick="logOut()">Log Out</button>
-  </div>
+  <!-- Dashboard -->
+  <div class="container" id="dashboard">
+    <div class="profile">
+      <img id="avatarImg" class="avatar" src="" alt="avatar" />
+      <div class="profile-info">
+        <input id="avatarUrl" placeholder="Avatar URL" />
+        <input id="username" placeholder="Username" />
+        <textarea id="bio" placeholder="Bio"></textarea>
+        <button onclick="saveProfile()">Save Profile</button>
+      </div>
+    </div>
 
-  <div class="container" id="booksSection">
-    <h2>Your Saved Books</h2>
-    <div id="savedBooksList"></div>
-    <h3>Add a Book</h3>
-    <input id="bookName" placeholder="Book Title" />
-    <button onclick="saveBook()">Save Book</button>
+    <div class="books">
+      <h3>Your Saved Books</h3>
+      <div id="savedBooksList"></div>
+      <input id="bookName" placeholder="Book Title" />
+      <button onclick="saveBook()">Add Book</button>
+    </div>
   </div>
 
   <script type="module">
@@ -52,18 +90,19 @@
     import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
     const firebaseConfig = {
-        apiKey: "AIzaSyCiqRuzqN6460s02rYk7ZGMbIUGbmVVXxg",
-        authDomain: "inkloom-12008.firebaseapp.com",
-        projectId: "inkloom-12008",
-        storageBucket: "inkloom-12008.firebasestorage.app",
-        messagingSenderId: "148104043088",
-        appId: "1:148104043088:web:1b9b2b0d937437d2670f55"
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_BUCKET",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // Auth Functions
     window.signUp = async function() {
       try {
         const email = document.getElementById('su_email').value;
@@ -103,6 +142,7 @@
         avatar: document.getElementById('avatarUrl').value
       }, { merge: true });
       alert("Profile updated!");
+      loadProfile(user);
     };
 
     window.saveBook = async function() {
@@ -134,30 +174,38 @@
       const list = document.getElementById('savedBooksList');
       list.innerHTML = "";
       if (snap.exists() && snap.data().savedBooks) {
-        snap.data().savedBooks.forEach(b => {
+        snap.data().savedBooks.forEach((b, i) => {
           const div = document.createElement("div");
-          div.className = "book";
-          div.textContent = b;
+          div.className = "book-item";
+          div.innerHTML = `<span>${b}</span> <button onclick='markRead(${i})'>Mark Read</button>`;
           list.appendChild(div);
         });
       }
     }
 
+    window.markRead = async function(index) {
+      alert(`Book ${index+1} marked as read! (You can integrate progress tracking here)`);
+    };
+
+    // Auth State Observer
     onAuthStateChanged(auth, (user) => {
       const authContainer = document.getElementById('authContainer');
-      const profilePage = document.getElementById('profilePage');
-      const booksSection = document.getElementById('booksSection');
+      const dashboard = document.getElementById('dashboard');
+      const loginLink = document.getElementById('loginLink');
+      const logoutLink = document.getElementById('logoutLink');
 
       if (user) {
         authContainer.style.display = "none";
-        profilePage.style.display = "block";
-        booksSection.style.display = "block";
+        dashboard.style.display = "block";
+        loginLink.style.display = "none";
+        logoutLink.style.display = "inline-block";
         loadProfile(user);
         loadBooks();
       } else {
         authContainer.style.display = "block";
-        profilePage.style.display = "none";
-        booksSection.style.display = "none";
+        dashboard.style.display = "none";
+        loginLink.style.display = "inline-block";
+        logoutLink.style.display = "none";
       }
     });
   </script>
